@@ -24,6 +24,10 @@
         <activity android:name=".UserPreferencesNew"
             android:label="New Earthquake Preferences">
         </activity>
+
+        <provider
+            android:authorities="com.feng.ye.earthquakeprovider"
+            android:name=".EarthquakeProvider"/>
     </application>
 
 </manifest>
