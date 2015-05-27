@@ -19,8 +19,9 @@ import android.util.Log;
  * Created by FengLianhai on 2015/5/26.
  */
 public class EarthquakeProvider extends ContentProvider {
+    public static final String TAG = EarthquakeProvider.class.getSimpleName();
 
-    public static final Uri CONTENT_URI = Uri.parse("com.feng.ye.earthquakeprovider/earthquakes");
+    public static final Uri CONTENT_URI = Uri.parse("content://com.feng.ye.earthquakeprovider/earthquakes");
 
     public static final String KEY_ID = "_id";
     public static final String KEY_DATE = "date";
@@ -47,12 +48,14 @@ public class EarthquakeProvider extends ContentProvider {
     public boolean onCreate() {
         dbHelper = new EarthquakeDatabaseHelper(getContext(),
                 EarthquakeDatabaseHelper.DATABASE_NAME, null, EarthquakeDatabaseHelper.DATABASE_VERSION);
+        Log.i(EarthquakeActivity.TAG, TAG + " ====> onCreate dpHelper=" + dbHelper);
         return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection,
                         String selection, String[] selectionArgs, String sortOrder) {
+        Log.i(EarthquakeActivity.TAG, TAG + " ====> query");
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(EarthquakeDatabaseHelper.DATABASE_TABLE);
@@ -80,6 +83,7 @@ public class EarthquakeProvider extends ContentProvider {
 
     @Override
     public String getType(Uri uri) {
+        Log.i(EarthquakeActivity.TAG, TAG + " ====> getType");
         switch (uriMatcher.match(uri)){
             case QUAKES:
                 return "vnd.android.cursor.dir/vnd.feng.ye.earthquake";
@@ -92,6 +96,7 @@ public class EarthquakeProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.i(EarthquakeActivity.TAG, TAG + " ====> insert");
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         //插入新行.如果插入成功，就返回行号
         long id = db.insert(EarthquakeDatabaseHelper.DATABASE_TABLE, "quake", values);
@@ -105,6 +110,7 @@ public class EarthquakeProvider extends ContentProvider {
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Log.i(EarthquakeActivity.TAG, TAG + " ====> delete");
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         int count;
         switch (uriMatcher.match(uri)){
@@ -125,6 +131,7 @@ public class EarthquakeProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        Log.i(EarthquakeActivity.TAG, TAG + " ====> update");
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         int count;
         switch (uriMatcher.match(uri)){
@@ -168,11 +175,13 @@ public class EarthquakeProvider extends ContentProvider {
 
         @Override
         public void onCreate(SQLiteDatabase db) {
+            Log.i(EarthquakeActivity.TAG, TAG + " ====> onCreate1111");
             db.execSQL(EARTHQUAKE_CREATE);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.i(EarthquakeActivity.TAG, TAG + " ====> onUpgrade1111");
             Log.w(TAG, "Upgrading database from " + oldVersion + " to " +
                     newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF IT EXISTS " + DATABASE_TABLE);

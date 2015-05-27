@@ -4,20 +4,22 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
 public class EarthquakeActivity extends AppCompatActivity {
+    public static final String TAG = EarthquakeActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, TAG + " ====> onCreate");
         setContentView(R.layout.activity_main);
 
         updateFromPreferences();
@@ -58,7 +60,7 @@ public class EarthquakeActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public int minimumMagnitude = 0;
+    public int minimumMagnitude = 0;        //用户首选项的最小地震大小
     public boolean autoUpdateChecked = false;
     public int updateFreq = 0;
 
@@ -90,6 +92,37 @@ public class EarthquakeActivity extends AppCompatActivity {
                 }
             });
             t.start();
+            //earthquakeList.refreshEarthquakes();
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i(TAG, TAG + " ====> onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG, TAG + " ====> onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.i(TAG, TAG + " ====> onPause");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.i(TAG, TAG + " ====> onStop");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(TAG, TAG + " ====> onDestroy");
     }
 }
