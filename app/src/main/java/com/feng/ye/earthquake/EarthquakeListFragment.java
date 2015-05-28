@@ -74,12 +74,12 @@ public class EarthquakeListFragment extends ListFragment implements LoaderManage
     public void refreshEarthquakes() {
         Log.i(EarthquakeActivity.TAG, TAG + " ====> refreshEarthquakes");
         //在主线程重新启动Loader
-        /*handler.post(new Runnable() {
+        handler.post(new Runnable() {
             @Override
             public void run() {
                 getLoaderManager().restartLoader(0, null, EarthquakeListFragment.this);
             }
-        });*/
+        });
         URL url;
         String quakeUrl = getString(R.string.quake_feed);
         try {

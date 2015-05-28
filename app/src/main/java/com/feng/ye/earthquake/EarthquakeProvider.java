@@ -1,5 +1,6 @@
 package com.feng.ye.earthquake;
 
+import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -13,6 +14,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
+
+import java.util.HashMap;
 
 
 /**
@@ -36,12 +39,25 @@ public class EarthquakeProvider extends ContentProvider {
 
     private static final int QUAKES = 1;
     private static final int QUAKE_ID = 2;
+    private static final int SEARCH = 3;
     private static final UriMatcher uriMatcher;
 
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI("com.feng.ye.earthquakeprovider", "earthquakes", QUAKES);
         uriMatcher.addURI("com.feng.ye.earthquakeprovider", "earthquakes/#", QUAKE_ID);
+        uriMatcher.addURI("com.feng.ye.earthquakeprovider", SearchManager.SUGGEST_URI_PATH_QUERY, SEARCH);
+        uriMatcher.addURI("com.feng.ye.earthquakeprovider", SearchManager.SUGGEST_URI_PATH_QUERY + "/*", SEARCH);
+        uriMatcher.addURI("com.feng.ye.earthquakeprovider", SearchManager.SUGGEST_URI_PATH_SHORTCUT, SEARCH);
+        uriMatcher.addURI("com.feng.ye.earthquakeprovider", SearchManager.SUGGEST_URI_PATH_SHORTCUT + "/*", SEARCH);
+    }
+
+    private static final HashMap<String,String> SEARCH_PROJECTION_MAP;
+    static {
+        SEARCH_PROJECTION_MAP = new HashMap<>();
+        SEARCH_PROJECTION_MAP.put(SearchManager.SUGGEST_COLUMN_TEXT_1,
+                KEY_SUMMARY + " AS " + SearchManager.SUGGEST_COLUMN_TEXT_1);
+        SEARCH_PROJECTION_MAP.put("_id", KEY_ID + " AS " + "_id");
     }
 
     @Override
@@ -59,24 +75,29 @@ public class EarthquakeProvider extends ContentProvider {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
         queryBuilder.setTables(EarthquakeDatabaseHelper.DATABASE_TABLE);
-        //Èç¹ûÊÇÐÐ²éÑ¯£¬¾Í°Ñ½á¹û¼¯ÏÞÖÆÎª´«ÈëµÄÐÐ
+        //å¦‚æžœæ˜¯ä¸€ä¸ªè¡ŒæŸ¥è¯¢ï¼Œå°±æŠŠç»“æžœé›†é™åˆ¶ä¸ºä¼ å…¥çš„è¡Œ
+        //å¦‚æžœæ˜¯æœç´¢æŸ¥è¯¢ï¼Œå°†æ•£åˆ—æŠ•å½±æ·»åŠ åˆ°ç»“æžœé›†ä¸­
         switch(uriMatcher.match(uri)){
             case QUAKE_ID:
                 queryBuilder.appendWhere(KEY_ID + "=" + uri.getPathSegments().get(1));
                 break;
+            case SEARCH:
+                queryBuilder.appendWhere(KEY_SUMMARY + " LIKE \"%" + uri.getPathSegments().get(1) + "%\"");
+                queryBuilder.setProjectionMap(SEARCH_PROJECTION_MAP);
+                break;
             default:break;
         }
-        //Èç¹ûÃ»ÓÐÖ¸¶¨ÅÅÐò£¬¾Í°´ÕÕÈÕÆÚ/Ê±¼äÅÅÐò
+        //ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ò£¬¾Í°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/Ê±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         String orderBy;
         if(TextUtils.isEmpty(sortOrder)){
             orderBy = KEY_DATE;
         }else {
             orderBy = sortOrder;
         }
-        //¶Ôµ×²ãÊý¾Ý¿âÖ´ÐÐ²éÑ¯
+        //ï¿½Ôµ×²ï¿½ï¿½ï¿½ï¿½Ý¿ï¿½Ö´ï¿½Ð²ï¿½Ñ¯
         Cursor c = queryBuilder.query(db, projection, selection,
                 selectionArgs, null, null, orderBy);
-        //×¢²áµ±ÓÎ±ê½á¹û¼¯¸Ä±äÊ±½«Í¨ÖªµÄÉÏÏÂÎÄContentResolver
+        //×¢ï¿½áµ±ï¿½Î±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä±ï¿½Ê±ï¿½ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ContentResolver
         c.setNotificationUri(getContext().getContentResolver(), uri);
         return c;
     }
@@ -89,6 +110,8 @@ public class EarthquakeProvider extends ContentProvider {
                 return "vnd.android.cursor.dir/vnd.feng.ye.earthquake";
             case QUAKE_ID:
                 return "vnd.android.cursor.item/vnd.feng.ye.earthquake";
+            case SEARCH:
+                return SearchManager.SUGGEST_MIME_TYPE;
             default:
                 throw new IllegalArgumentException("Unsupported Uri: " + uri);
         }
@@ -98,7 +121,7 @@ public class EarthquakeProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         Log.i(EarthquakeActivity.TAG, TAG + " ====> insert");
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        //²åÈëÐÂÐÐ.Èç¹û²åÈë³É¹¦£¬¾Í·µ»ØÐÐºÅ
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½.ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½ï¿½ï¿½ï¿½Í·ï¿½ï¿½ï¿½ï¿½Ðºï¿½
         long id = db.insert(EarthquakeDatabaseHelper.DATABASE_TABLE, "quake", values);
         if(id > 0){
             Uri insertedUri = ContentUris.withAppendedId(CONTENT_URI, id);

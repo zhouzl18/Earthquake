@@ -1,6 +1,8 @@
 package com.feng.ye.earthquake;
 
 import android.app.FragmentManager;
+import android.app.SearchManager;
+import android.app.SearchableInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SearchView;
 
 
 public class EarthquakeActivity extends AppCompatActivity {
@@ -23,6 +26,14 @@ public class EarthquakeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         updateFromPreferences();
+
+        //获取SearchManager
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        //SearchableInfo
+        SearchableInfo searchableInfo = searchManager.getSearchableInfo(getComponentName());
+        //将Activity的searchableInfo与搜索视图进行绑定
+        SearchView searchView = (SearchView) findViewById(R.id.searchView);
+        searchView.setSearchableInfo(searchableInfo);
     }
 
     static final private int MENU_PREFERENCE = Menu.FIRST + 1;
